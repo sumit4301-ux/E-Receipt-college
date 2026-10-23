@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% block title %}Receipt {{ r.serial_no|serial }}{% endblock %}{% block ph %}{% endblock %}{% block body %}
+<div class="slip">{% if college.get('wm_text') or college.get('wm_image') %}<div class="wm">{% if college.get('wm_image') %}<img src="{{ url_for('static', filename='uploads/' + college.wm_image) }}" alt="">{% endif %}{% if college.get('wm_text') %}<span>{{ college.wm_text }}</span>{% endif %}</div>{% endif %}
+<h3>{{ college.get('name') or 'GIST, Rayagada' }}</h3>
+<div class="subhead">{% if college.get('address') %}<div>{{ college.address }}</div>{% endif %}
+{% set contact = [] %}{% if college.get('phone') %}{% set _ = contact.append('Phone: ' ~ college.phone) %}{% endif %}{% if college.get('email') %}{% set _ = contact.append('Email: ' ~ college.email) %}{% endif %}{% if college.get('website') %}{% set _ = contact.append(college.website) %}{% endif %}
+{% if contact %}<div>{{ contact|join('  |  ') }}</div>{% endif %}
+<strong>Official fee receipt</strong></div>
+{% if copy %}<div class="mark">DUPLICATE COPY</div>{% endif %}{% if r.status == 'Cancelled' %}<div class="mark">CANCELLED</div>{% endif %}
+<table>
+<tr><td>Receipt book no.</td><td>{{ r.book_no }}</td></tr><tr><td>Serial no.</td><td>{{ r.serial_no|serial }}</td></tr>
+<tr><td>Date</td><td>{{ r.receipt_date }}</td></tr><tr><td>Student name</td><td>{{ r.name }}</td></tr>
+<tr><td>Roll number</td><td>{{ r.roll_no }}</td></tr><tr><td>Course, branch</td><td>{{ r.course }}, {{ r.branch }}</td></tr>
+<tr><td>Academic year</td><td>{{ r.acad_session }}</td></tr>
+<tr><td>Payment mode</td><td>{{ r.pay_mode }}{% if r.txn_ref %} ({{ r.txn_ref }}){% endif %}</td></tr></table>
+<table><tr><th>Purpose</th><th>Semester</th><th>Amount</th></tr>{% for i in items %}<tr><td>{{ i.name }}</td><td>{{ i.semester or '-' }}</td><td>{{ i.amount|inr }}</td></tr>{% endfor %}
+<tr><td colspan="2"><strong>Total</strong></td><td><strong>{{ r.amount|inr }}</strong></td></tr></table>
+{% if qrs %}<div class="logos">{% for q in qrs %}<figure style="margin:0;text-align:center"><img src="{{ url_for('static', filename='uploads/' + q.filename) }}" alt="{{ q.label }}"><figcaption>{{ q.label }}</figcaption></figure>{% endfor %}</div>{% endif %}
+<p class="sig">Authorised signature: ____________________</p></div>
+<div class="bar noprint"><button onclick="window.print()">Print receipt</button>
+<a class="btn alt" href="{{ url_for('receipt_view', rid=r.id, copy=1) }}">Open duplicate copy</a>
+{% if session.role == 'superadmin' %}<a class="btn alt" href="{{ url_for('receipt_save', rid=r.id) }}">Edit receipt</a>{% endif %}
+<small>To save a PDF, choose Save as PDF in the print window.</small></div>
+{% if r.status == 'Cancelled' %}<p class="noprint">Cancelled: {{ r.cancel_reason }}</p>
+{% elif has('admin','accountant') %}<form method="post" action="{{ url_for('receipt_cancel', rid=r.id) }}" class="bar noprint"><input name="reason" placeholder="Reason for cancelling" required><button class="danger">Cancel receipt</button></form>{% endif %}
+{% endblock %}

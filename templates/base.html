@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Dashboard{% endblock %} | Receipts</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<!-- PWA Manifest & Service Worker Setup -->
+<link rel="manifest" href="/manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+        .catch(err => console.log('Service Worker registration failed:', err));
+    });
+  }
+</script>
+</head><body>
+{% if session.uid %}
+<aside class="side"><h1>{{ college.get('name') or 'GIST, Rayagada' }}</h1><p>Digital Receipt Management</p>
+<nav>
+<a href="{{ url_for('dashboard') }}">Dashboard</a>
+{% if session.role != 'principal' %}<a href="{{ url_for('receipt_save') }}">Add receipt</a>{% endif %}
+<a href="{{ url_for('search') }}">Receipt search</a>
+{% if has('admin','accountant') %}<a href="{{ url_for('books') }}">Receipt books</a>{% endif %}
+{% if session.role != 'principal' %}<a href="{{ url_for('students') }}">Students</a>{% endif %}
+<a href="{{ url_for('daily') }}">Daily collection</a>
+{% if has('admin') %}<a href="{{ url_for('college_page') }}">College details</a>{% endif %}
+{% if has() %}<a href="{{ url_for('master') }}">Master data</a>{% endif %}
+<a href="{{ url_for('account') }}">My account</a>
+</nav><div class="who">{{ session.user }} ({{ 'ultra admin' if session.role == 'superadmin' else session.role }})<a href="{{ url_for('logout') }}">Log out</a></div></aside>
+{% endif %}
+<main>
+{% block ph %}{% if session.uid %}<div class="printhead"><strong>{{ college.get('name') or 'GIST, Rayagada' }}</strong><br>{{ college.get('address','') }} {{ college.get('phone','') }}{% if college.get('email') %}<br>{{ college.get('email') }}{% endif %}</div>
+<div class="noprint" style="text-align:right"><button class="btn alt" onclick="window.print()">Print this page</button></div>{% endif %}{% endblock %}
+{% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% block body %}{% endblock %}
+</main><script src="{{ url_for('static', filename='app.js') }}"></script></body></html>

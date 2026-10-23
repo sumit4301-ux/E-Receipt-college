@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, email TEXT, role TEXT NOT NULL CHECK(role IN ('superadmin','admin','accountant','staff','principal')), active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE IF NOT EXISTS courses(id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL, duration INTEGER NOT NULL DEFAULT 4);
+CREATE TABLE IF NOT EXISTS acad_years(id INTEGER PRIMARY KEY, course_id INTEGER NOT NULL REFERENCES courses(id), label TEXT NOT NULL, UNIQUE(course_id,label));
+CREATE TABLE IF NOT EXISTS branches(id INTEGER PRIMARY KEY, course_id INTEGER NOT NULL REFERENCES courses(id), name TEXT NOT NULL, UNIQUE(course_id,name));
+CREATE TABLE IF NOT EXISTS students(id INTEGER PRIMARY KEY, roll_no TEXT UNIQUE NOT NULL, name TEXT NOT NULL, course TEXT, branch TEXT, acad_session TEXT);
+CREATE TABLE IF NOT EXISTS fee_categories(id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL);
+CREATE TABLE IF NOT EXISTS pay_modes(id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL);
+CREATE TABLE IF NOT EXISTS receipt_books(id INTEGER PRIMARY KEY, book_no TEXT UNIQUE NOT NULL, serial_from INTEGER NOT NULL, serial_to INTEGER NOT NULL, assigned_to TEXT, issue_date TEXT, status TEXT NOT NULL DEFAULT 'In use');
+CREATE TABLE IF NOT EXISTS receipts(id INTEGER PRIMARY KEY, book_id INTEGER NOT NULL REFERENCES receipt_books(id), serial_no INTEGER NOT NULL, student_id INTEGER NOT NULL REFERENCES students(id), receipt_date TEXT NOT NULL, entry_ts TEXT NOT NULL, amount REAL NOT NULL CHECK(amount>0), pay_mode TEXT NOT NULL, txn_ref TEXT, remarks TEXT, status TEXT NOT NULL DEFAULT 'Issued', cancel_reason TEXT, entered_by INTEGER NOT NULL REFERENCES users(id), UNIQUE(book_id, serial_no));
+CREATE TABLE IF NOT EXISTS receipt_items(id INTEGER PRIMARY KEY, receipt_id INTEGER NOT NULL REFERENCES receipts(id) ON DELETE CASCADE, category_id INTEGER NOT NULL REFERENCES fee_categories(id), semester TEXT, amount REAL NOT NULL CHECK(amount>0));
+CREATE TABLE IF NOT EXISTS audit_log(id INTEGER PRIMARY KEY, receipt_id INTEGER, user_id INTEGER, action TEXT, old_value TEXT, new_value TEXT, ts TEXT);
+CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS qr_codes(id INTEGER PRIMARY KEY, label TEXT, filename TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS semesters(id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL);

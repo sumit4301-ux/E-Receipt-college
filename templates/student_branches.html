@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Choose branch{% endblock %}{% block body %}
+<p class="crumbs"><a href="{{ url_for('students') }}">Students</a> / <a href="{{ url_for('st_years', cid=course.id) }}">{{ course.name }}</a> / {{ year.label }}</p>
+<h2>{{ course.name }} {{ year.label }}: choose the branch</h2>
+<div class="cards">{% for b in branches %}<a class="card mint" href="{{ url_for('st_list', cid=course.id, yid=year.id, bid=b.id) }}"><strong>{{ b.name }}</strong><span>{{ b.n }} students</span></a>
+{% else %}<p>No branches yet.{% if session.role == 'superadmin' %} Add one below.{% endif %}</p>{% endfor %}</div>
+{% if session.role == 'superadmin' %}
+<div class="panel"><h3>Manage branches of {{ course.name }}</h3>
+<form method="post" class="bar"><input type="hidden" name="action" value="add"><input name="name" placeholder="New branch name" required><button>Add branch</button></form>
+{% for b in branches %}<form method="post" class="bar" style="margin:4px 0" onsubmit="return confirm('Delete branch {{ b.name }} from {{ course.name }}? This applies to every academic year.')"><input type="hidden" name="action" value="del"><input type="hidden" name="id" value="{{ b.id }}"><span class="tag">{{ b.name }}</span><button class="danger">Delete</button></form>{% endfor %}</div>
+{% endif %}{% endblock %}

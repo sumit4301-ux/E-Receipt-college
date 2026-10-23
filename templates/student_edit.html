@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Edit student{% endblock %}{% block body %}<h2>Edit student</h2>
+<form method="post" class="panel grid">
+<label>Roll number<input name="roll_no" value="{{ s.roll_no }}" required></label>
+<label>Student name<input name="name" value="{{ s.name }}" required></label>
+<label>Course<input value="{{ s.course }}" disabled></label>
+<label>Academic year<select name="acad_session">{% for y in years %}<option {{ 'selected' if y == s.acad_session }}>{{ y }}</option>{% endfor %}</select></label>
+<label>Branch<select name="branch">{% for b in branches %}<option {{ 'selected' if b == s.branch }}>{{ b }}</option>{% endfor %}</select></label>
+<div class="bar"><button>Save changes</button><a class="btn alt" href="{{ back }}">Back</a></div></form>
+<form method="post" action="{{ url_for('student_delete', sid=s.id) }}" onsubmit="return confirm('Delete this student permanently?')"><button class="danger">Delete this student</button></form>{% endblock %}

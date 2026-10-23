@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}My account{% endblock %}{% block body %}<h2>My account</h2>
+<p>Signed in as <strong>{{ me.username }}</strong>. Sign-in email: <strong>{{ me.email or 'not set yet' }}</strong>. You can sign in with either your email or your username.</p>
+<form method="post" class="panel grid"><input type="hidden" name="action" value="email"><h3 style="grid-column:1/-1;margin:0">Change email</h3>
+<label>New email<input type="email" name="email" value="{{ me.email or '' }}" required></label>
+<label>Current password<input type="password" name="current" required></label><button>Save email</button></form>
+<form method="post" class="panel grid"><input type="hidden" name="action" value="password"><h3 style="grid-column:1/-1;margin:0">Change password</h3>
+<label>Current password<input type="password" name="current" required></label>
+<label>New password (at least 8 characters)<input type="password" name="new" minlength="8" required></label>
+<label>Repeat new password<input type="password" name="again" minlength="8" required></label><button>Change password</button></form>
+{% if users %}<form method="post" class="panel grid"><input type="hidden" name="action" value="other"><h3 style="grid-column:1/-1;margin:0">Reset another user (ultra admin)</h3>
+<label>User<select name="uid">{% for u in users %}<option value="{{ u.id }}">{{ u.username }} ({{ u.role }}){% if u.email %}, {{ u.email }}{% endif %}</option>{% endfor %}</select></label>
+<label>New email (leave empty to keep)<input type="email" name="email"></label>
+<label>New password (leave empty to keep)<input type="password" name="new" minlength="8"></label><button>Update user</button></form>{% endif %}
+{% endblock %}

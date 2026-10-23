@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block title %}Master data{% endblock %}
+{% macro box(title, kind, rows) %}<div class="panel"><h3>{{ title }}</h3>
+<form method="post" class="bar"><input type="hidden" name="kind" value="{{ kind }}"><input type="hidden" name="action" value="add">
+{% if kind in ('branch', 'year') %}<select name="course_id">{% for c in courses %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>{% endif %}
+{% if kind == 'year' %}<input type="number" name="start" min="1990" max="2100" placeholder="Starting year, e.g. 2023" required>
+{% else %}<input name="name" placeholder="New name" required>{% endif %}
+{% if kind == 'course' %}<input type="number" name="duration" min="1" max="6" value="4" title="Course duration in years" style="width:90px">{% endif %}
+<button>Add</button></form>
+{% for r in rows %}<form method="post" class="bar" style="margin:4px 0"><input type="hidden" name="kind" value="{{ kind }}"><input type="hidden" name="action" value="del"><input type="hidden" name="id" value="{{ r.id }}"><span class="tag">{{ r.label }}</span><button class="danger">Delete</button></form>{% endfor %}</div>{% endmacro %}
+{% block body %}<h2>Master data (ultra admin)</h2>
+{{ box('Courses', 'course', courses) }}{{ box('Academic years (end year is added from the course duration)', 'year', years) }}{{ box('Branches', 'branch', branches) }}{{ box('Fee purposes', 'purpose', cats) }}{{ box('Semesters (shown in the receipt form, for example 1 or 1 Back)', 'semester', sems) }}{{ box('Payment modes', 'mode', pmodes) }}
+<div class="panel"><h3>Receipt watermark</h3>
+<form method="post" enctype="multipart/form-data" class="grid"><input type="hidden" name="kind" value="watermark">
+<label>Watermark text (for example the institution name)<input name="wm_text" value="{{ college.get('wm_text','') }}"></label>
+<label>Watermark image / logo (from your computer)<input type="file" name="wm_image" accept="image/*"></label>
+<button>Save watermark</button></form>
+{% if college.get('wm_image') %}<div class="bar"><img src="{{ url_for('static', filename='uploads/' + college.wm_image) }}" alt="Watermark image" style="max-height:80px;border:1px solid var(--line);border-radius:6px">
+<form method="post"><input type="hidden" name="kind" value="watermark"><input type="hidden" name="action" value="img_del"><button class="danger">Remove image</button></form></div>{% endif %}
+<small>The text and image appear faintly behind the receipt content, on screen and when printed. Clear the text and save to remove it.</small></div>
+{% endblock %}

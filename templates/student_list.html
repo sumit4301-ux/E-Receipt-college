@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Students{% endblock %}{% block body %}
+<p class="crumbs"><a href="{{ url_for('students') }}">Students</a> / <a href="{{ url_for('st_years', cid=course.id) }}">{{ course.name }}</a> / <a href="{{ url_for('st_branches', cid=course.id, yid=year.id) }}">{{ year.label }}</a> / {{ branch.name }}</p>
+<h2>{{ course.name }} {{ year.label }}, {{ branch.name }}</h2>
+<form method="post" class="panel grid">
+<label>Roll number<input name="roll_no" required></label><label>Student name<input name="name" required></label>
+<button>Add student</button></form>
+<form method="post" action="{{ url_for('students_import', cid=course.id, yid=year.id, bid=branch.id) }}" enctype="multipart/form-data" class="panel bar">
+<label>Import from Excel (.xlsx), columns: Roll No, Name<input type="file" name="file" accept=".xlsx" required></label><button>Import students</button>
+<a class="btn alt" href="{{ url_for('students_template') }}">Download Excel template</a></form>
+<p><strong>{{ rows|length }}</strong> students in this group. New students, including later Excel imports, are added at the bottom.</p>
+<div class="wrap"><table><tr><th>No.</th><th>Roll no</th><th>Name</th>{% if session.role == 'superadmin' %}<th></th>{% endif %}</tr>
+{% for s in rows %}<tr><td>{{ loop.index }}</td><td>{{ s.roll_no }}</td><td>{{ s.name }}</td>{% if session.role == 'superadmin' %}<td><a href="{{ url_for('student_edit', sid=s.id) }}">Edit</a><form method="post" action="{{ url_for('student_delete', sid=s.id) }}" style="display:inline;margin-left:10px" onsubmit="return confirm('Delete {{ s.name|e }} permanently?')"><button class="danger" style="padding:3px 10px">Delete</button></form></td>{% endif %}</tr>
+{% else %}<tr><td colspan="4">No students yet. Add one above or import an Excel sheet.</td></tr>{% endfor %}</table></div>{% endblock %}

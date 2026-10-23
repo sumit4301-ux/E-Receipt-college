@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Daily collection{% endblock %}{% block body %}<h2>Daily collection</h2>
+<form class="bar"><input type="date" name="d" value="{{ d }}"><button>Show</button></form>
+<div class="wrap"><table><tr><th>Payment mode</th><th>Receipts</th><th>Amount</th></tr>
+{% for r in rows %}<tr><td>{{ r.pay_mode }}</td><td>{{ r.n }}</td><td>{{ r.total|inr }}</td></tr>{% else %}<tr><td colspan="3">No receipts on this date.</td></tr>{% endfor %}
+<tr><th>Total</th><th>{{ n }}</th><th>{{ total|inr }}</th></tr></table></div>
+<p>Cancelled receipts on this date: {{ cancelled }} (not included in the total).</p>{% endblock %}

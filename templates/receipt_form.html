@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}{{ 'Edit' if edit else 'Add' }} receipt{% endblock %}{% block body %}<h2>{{ 'Edit receipt' if edit else 'Add receipt' }}</h2>
+<form method="post">
+<div class="panel grid">
+<label>Receipt book<select name="book_id" id="book" required>{% for b in books %}<option value="{{ b.id }}" data-r="{{ b.serial_from|serial }} to {{ b.serial_to|serial }}" {{ 'selected' if f.get('book_id')|string==b.id|string }}>{{ b.book_no }}</option>{% endfor %}</select><small id="range"></small></label>
+<label>Serial number<input type="number" name="serial_no" min="1" value="{{ f.get('serial_no','') }}" required></label>
+<label>Receipt date<input type="date" name="receipt_date" value="{{ f.get('receipt_date') or today }}" required></label>
+<label>Student roll number<input name="roll_no" id="roll" value="{{ f.get('roll_no','') }}" required><small id="stu"></small></label>
+<label>Payment mode<select name="pay_mode">{% for m in modes %}<option {{ 'selected' if f.get('pay_mode')==m }}>{{ m }}</option>{% endfor %}</select></label>
+<label>Transaction reference<input name="txn_ref" value="{{ f.get('txn_ref') or '' }}"></label>
+<label>Remarks<input name="remarks" value="{{ f.get('remarks') or '' }}"></label></div>
+<div class="panel" id="items"><strong>Semester, purpose and amount</strong>
+{% for it in items %}<div class="grid item"><label>Semester<select name="item_semester"><option value="">Not applicable</option>{% for s in sems %}<option {{ 'selected' if it.sem==s }}>{{ s }}</option>{% endfor %}</select></label>
+<label>Purpose<select name="category_id">{% for k in cats %}<option value="{{ k.id }}" {{ 'selected' if it.cat|string==k.id|string }}>{{ k.name }}</option>{% endfor %}</select></label>
+<label>Amount (₹)<input type="number" name="item_amount" step="0.01" min="0.01" value="{{ it.amt }}" required></label>
+<button type="button" class="btn alt rm">Remove</button></div>{% endfor %}</div>
+<div class="bar"><button type="button" class="btn alt" id="addrow">Add another purpose</button><strong>Total: ₹<span id="total">0.00</span></strong></div>
+<button>{{ 'Save changes' if edit else 'Save receipt' }}</button></form>
+{% if not books %}<p>Register a receipt book first (Receipt books menu).</p>{% endif %}{% endblock %}

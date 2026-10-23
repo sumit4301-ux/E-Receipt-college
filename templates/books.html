@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Receipt books{% endblock %}{% block body %}<h2>Receipt book register</h2>
+<form method="post" class="panel grid">
+<label>Book number<input name="book_no" placeholder="RB-2026-001" required></label>
+<label>Serial from<input type="number" name="serial_from" min="1" required></label>
+<label>Serial to<input type="number" name="serial_to" min="1" required></label>
+<label>Assigned to<input name="assigned_to" required></label>
+<label>Issue date<input type="date" name="issue_date" value="{{ today }}" required></label>
+<button>Register book</button></form>
+<div class="wrap"><table><tr><th>Book no</th><th>Serials</th><th>Assigned to</th><th>Issued</th><th>Receipts entered</th><th>Status</th></tr>
+{% for b in rows %}<tr><td>{{ b.book_no }}</td><td>{{ b.serial_from|serial }} to {{ b.serial_to|serial }}</td><td>{{ b.assigned_to }}</td><td>{{ b.issue_date }}</td><td>{{ b.used }}</td><td><span class="tag">{{ b.status }}</span></td></tr>
+{% else %}<tr><td colspan="6">No receipt books registered yet.</td></tr>{% endfor %}</table></div>{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Students{% endblock %}{% block body %}<h2>Students</h2>
+<p>Choose a course to continue: Course, then Academic year, then Branch, then the student list.</p>
+<div class="cards">{% for c in courses %}<a class="card mint" href="{{ url_for('st_years', cid=c.id) }}"><strong>{{ c.name }}</strong><span>{{ c.duration }}-year course, {{ c.n }} students</span></a>
+{% else %}<p>No courses yet. The ultra admin can add them in Master data.</p>{% endfor %}</div>
+<h3>Find a student</h3>
+<form class="bar"><input name="q" value="{{ q }}" placeholder="Search name or roll no"><button>Search</button></form>
+{% if q %}<div class="wrap"><table><tr><th>Roll no</th><th>Name</th><th>Course</th><th>Academic year</th><th>Branch</th>{% if session.role == 'superadmin' %}<th></th>{% endif %}</tr>
+{% for s in rows %}<tr><td>{{ s.roll_no }}</td><td>{{ s.name }}</td><td>{{ s.course }}</td><td>{{ s.acad_session }}</td><td>{{ s.branch }}</td>{% if session.role == 'superadmin' %}<td><a href="{{ url_for('student_edit', sid=s.id) }}">Edit</a></td>{% endif %}</tr>
+{% else %}<tr><td colspan="6">No student matches your search.</td></tr>{% endfor %}</table></div>{% endif %}
+{% endblock %}

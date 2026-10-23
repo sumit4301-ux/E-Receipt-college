@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}{{ course.name }} academic years{% endblock %}{% block body %}
+<p class="crumbs"><a href="{{ url_for('students') }}">Students</a> / {{ course.name }}</p>
+<h2>{{ course.name }}: choose the academic year</h2>
+<div class="cards">{% for y in years %}<a class="card mint" href="{{ url_for('st_branches', cid=course.id, yid=y.id) }}"><strong>{{ y.label }}</strong><span>{{ y.n }} students</span></a>
+{% else %}<p>No academic years yet.{% if session.role == 'superadmin' %} Add one below.{% else %} Ask the ultra admin to add one.{% endif %}</p>{% endfor %}</div>
+{% if session.role == 'superadmin' %}
+<div class="panel"><h3>Manage academic years ({{ course.duration }}-year course)</h3>
+<form method="post" class="bar"><input type="hidden" name="action" value="add">
+<input type="number" name="start" min="1990" max="2100" placeholder="Starting year, e.g. {{ 2023 }}" required><button>Add year</button>
+<small>The end year is added automatically, so 2023 becomes 2023-{{ 2023 + course.duration }}.</small></form>
+{% for y in years %}<form method="post" class="bar" style="margin:4px 0" onsubmit="return confirm('Delete academic year {{ y.label }}?')"><input type="hidden" name="action" value="del"><input type="hidden" name="id" value="{{ y.id }}"><span class="tag">{{ y.label }}</span><button class="danger">Delete</button></form>{% endfor %}</div>
+{% endif %}{% endblock %}

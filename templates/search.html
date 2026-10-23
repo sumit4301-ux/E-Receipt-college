@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Receipt search{% endblock %}{% block body %}<h2>Receipt search</h2>
+<form method="get" class="panel grid">
+<label>Search<input name="q" value="{{ a.get('q','') }}" placeholder="Book, serial, name or roll no"></label>
+<label>From<input type="date" name="date_from" value="{{ a.get('date_from','') }}"></label>
+<label>To<input type="date" name="date_to" value="{{ a.get('date_to','') }}"></label>
+<label>Purpose<select name="category"><option value="">All</option>{% for k in cats %}<option value="{{ k.id }}" {{ 'selected' if a.get('category')==k.id|string }}>{{ k.name }}</option>{% endfor %}</select></label>
+<label>Payment mode<select name="mode"><option value="">All</option>{% for m in modes %}<option {{ 'selected' if a.get('mode')==m }}>{{ m }}</option>{% endfor %}</select></label>
+<label>Status<select name="status"><option value="">All</option>{% for s in ['Issued','Cancelled'] %}<option {{ 'selected' if a.get('status')==s }}>{{ s }}</option>{% endfor %}</select></label>
+<div class="bar"><button>Search</button><a class="btn alt" href="{{ url_for('search') }}">Reset filters</a>
+{% if session.role != 'staff' %}<a class="btn alt" href="{{ url_for('export', **a.to_dict()) }}">Export to Excel</a>{% endif %}</div></form>
+<div class="wrap"><table><tr><th>Book</th><th>Serial</th><th>Date</th><th>Student</th><th>Roll no</th><th>Purpose</th><th>Amount</th><th>Mode</th><th>Status</th><th></th></tr>
+{% for r in rows %}<tr><td>{{ r.book_no }}</td><td>{{ r.serial_no|serial }}</td><td>{{ r.receipt_date }}</td><td>{{ r.name }}</td><td>{{ r.roll_no }}</td><td>{{ r.purposes }}</td><td>{{ r.amount|inr }}</td><td>{{ r.pay_mode }}</td><td><span class="tag {{ r.status }}">{{ r.status }}</span></td><td><a href="{{ url_for('receipt_view', rid=r.id) }}">View</a></td></tr>
+{% else %}<tr><td colspan="10">No receipts match these filters.</td></tr>{% endfor %}</table></div>{% endblock %}

@@ -1,0 +1,8 @@
+{
+  "name": "E-Receipt College App",
+  "short_name": "E-Receipt",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1b4d3e"
+}

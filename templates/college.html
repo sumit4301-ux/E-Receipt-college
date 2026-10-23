@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}College details{% endblock %}{% block body %}
+{% set ultra = session.role == 'superadmin' %}
+{% set fields = [('College name','name'),('Address','address'),('Phone','phone'),('Email','email'),('Website','website'),('Account holder name','account_holder'),('Bank name','bank_name'),('Account number','account_no'),('IFSC code','ifsc')] %}
+<h2>College details</h2>
+{% if ultra %}
+<form method="post" class="panel grid"><input type="hidden" name="action" value="save">
+{% for label, key in fields %}<label>{{ label }}<input name="{{ key }}" value="{{ college.get(key,'') }}"></label>{% endfor %}
+<button>Save details</button></form>
+{% else %}
+<div class="panel"><table>{% for label, key in fields %}<tr><td>{{ label }}</td><td>{{ college.get(key,'') }}</td></tr>{% endfor %}</table></div>
+{% endif %}
+<h2>Payment QR codes</h2>
+{% if ultra %}
+<form method="post" enctype="multipart/form-data" class="panel grid"><input type="hidden" name="action" value="qr_add">
+<label>Label (for example UPI)<input name="label"></label>
+<label>Images (you can choose several)<input type="file" name="images" accept="image/*" multiple required></label><button>Add QR codes</button></form>
+{% endif %}
+<div class="logos">{% for q in qrs %}<div style="text-align:center">
+<img src="{{ url_for('static', filename='uploads/' + q.filename) }}" alt="{{ q.label }}"><br>{{ q.label }}
+{% if ultra %}<form method="post"><input type="hidden" name="action" value="qr_del"><input type="hidden" name="id" value="{{ q.id }}"><button class="danger">Remove</button></form>{% endif %}</div>
+{% else %}<p>No QR codes added yet.</p>{% endfor %}</div>{% endblock %}
