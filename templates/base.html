@@ -31,4 +31,4 @@
 <div class="noprint" style="text-align:right"><button class="btn alt" onclick="window.print()">Print this page</button></div>{% endif %}{% endblock %}
 {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
 {% block body %}{% endblock %}
-</main><script src="{{ url_for('static', filename='app.js') }}"></script></body></html>
+</main><script type="module" src="{{ url_for('static', filename='app.js') }}"></script></body></html>

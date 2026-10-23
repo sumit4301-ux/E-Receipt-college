@@ -118,6 +118,13 @@ def xlsx_response(wb, name):
     return send_file(buf, as_attachment=True, download_name=name, mimetype=XLSX)
 
 
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('static', 'manifest.json')
+
+@app.route('/sw.js')
+def service_worker():
+    return send_from_directory('static', 'sw.js')
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
