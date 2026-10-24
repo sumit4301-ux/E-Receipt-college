@@ -120,11 +120,16 @@ def xlsx_response(wb, name):
 
 @app.route('/manifest.json')
 def manifest():
-    return send_from_directory('static', 'manifest.json')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'manifest.json')
 
 @app.route('/sw.js')
 def service_worker():
-    return send_from_directory('static', 'sw.js')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'sw.js')
+
+@app.route('/')
+def index():
+    return "E-Receipt App is running!"
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -568,18 +573,67 @@ def find(args):
         if args.get(key):
             w.append(f"{col}{op}?")
             p.append(args[key])
-    if args.get("category"):
-        w.append("EXISTS(SELECT 1 FROM receipt_items i WHERE i.receipt_id=r.id AND i.category_id=?)")
-        p.append(args["category"])
+    for key, col in (("course", "s.course"), ("year", "s.acad_session"), ("branch", "s.branch")):
+        if args.get(key):
+            w.append(f"{col}=?")
+            p.append(args[key])
+    if args.get("category") or args.get("semester"):
+        cond, cp = "", []
+        if args.get("category"):
+            cond += " AND i.category_id=?"
+            cp.append(args["category"])
+        if args.get("semester"):
+            cond += " AND i.semester=?"
+            cp.append(args["semester"])
+        w.append("EXISTS(SELECT 1 FROM receipt_items i WHERE i.receipt_id=r.id" + cond + ")")
+        p += cp
     sql = BASE_SQL + (" WHERE " + " AND ".join(w) if w else "") + " ORDER BY r.receipt_date DESC, r.id DESC LIMIT 500"
     return db().execute(sql, p).fetchall()
+
+
+def paid_summary(args):
+    """How many students of a course / academic year have paid a purpose, branch by branch."""
+    course, cat, year, sel = args.get("course", ""), args.get("category", ""), args.get("year", ""), args.get("branch", "")
+    sem = args.get("semester", "")
+    if not (course and cat):
+        return None
+    c = db()
+    purpose = c.execute("SELECT name FROM fee_categories WHERE id=?", (cat,)).fetchone()
+    cr = c.execute("SELECT id FROM courses WHERE name=?", (course,)).fetchone()
+    if not purpose or not cr:
+        return None
+    yw, yp = (" AND s.acad_session=?", [year]) if year else ("", [])
+    sw, sp = (" AND i.semester=?", [sem]) if sem else ("", [])
+    paid = {r["branch"]: r for r in c.execute(
+        "SELECT s.branch, COUNT(DISTINCT s.id) AS n, SUM(i.amount) AS amt FROM receipt_items i "
+        "JOIN receipts r ON r.id=i.receipt_id AND r.status='Issued' JOIN students s ON s.id=r.student_id "
+        "WHERE i.category_id=? AND s.course=?" + yw + sw + " GROUP BY s.branch", [cat, course] + yp + sp)}
+    total = {r["branch"]: r["n"] for r in c.execute(
+        "SELECT s.branch, COUNT(*) AS n FROM students s WHERE s.course=?" + yw + " GROUP BY s.branch", [course] + yp)}
+    names = [r["name"] for r in c.execute("SELECT name FROM branches WHERE course_id=? ORDER BY name", (cr["id"],))]
+    names += [b for b in list(paid) + list(total) if b not in names]
+    base = args.to_dict()
+    rows = [dict(branch=b, paid=paid[b]["n"] if b in paid else 0, total=total.get(b, 0),
+                 amount=(paid[b]["amt"] or 0) if b in paid else 0, url=url_for("search", **dict(base, branch=b)),
+                 selected=(b == sel)) for b in names]
+    chosen = [r for r in rows if r["selected"]]
+    shown = chosen or rows
+    return dict(purpose=purpose["name"], course=course, year=year, semester=sem, rows=rows, branch=sel,
+                paid=sum(r["paid"] for r in shown), total=sum(r["total"] for r in shown), amount=sum(r["amount"] for r in shown),
+                all_url=url_for("search", **{k: v for k, v in base.items() if k != "branch"}))
 
 
 @app.route("/receipts")
 @access()
 def search():
-    cats = db().execute("SELECT * FROM fee_categories ORDER BY id").fetchall()
-    return render_template("search.html", rows=find(request.args), cats=cats, modes=modes(), a=request.args)
+    c = db()
+    cats = c.execute("SELECT * FROM fee_categories ORDER BY id").fetchall()
+    courses = c.execute("SELECT * FROM courses ORDER BY id").fetchall()
+    years = {x["name"]: [y["label"] for y in c.execute("SELECT label FROM acad_years WHERE course_id=? ORDER BY label DESC", (x["id"],))] for x in courses}
+    branches = {x["name"]: [b["name"] for b in c.execute("SELECT name FROM branches WHERE course_id=? ORDER BY name", (x["id"],))] for x in courses}
+    sems = [r["name"] for r in c.execute("SELECT name FROM semesters ORDER BY id")]
+    return render_template("search.html", rows=find(request.args), cats=cats, sems=sems, modes=modes(), a=request.args,
+                           courses=courses, years=years, branches=branches, summary=paid_summary(request.args))
 
 
 @app.route("/receipts/export")

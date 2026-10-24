@@ -69,3 +69,30 @@ main{max-width:none;padding:0}
 .slip th{background:rgba(228,243,234,.7)}
 .subhead{text-align:center;margin:2px 0 8px;font-size:14px}
 @media print{.slip th{background:transparent}.subhead{font-size:17px}.wm span{font-size:84px}}
+/* compact A4 receipt: 6 purposes + 2 QR codes stay on one page */
+@page{size:A4;margin:8mm}
+@media print{
+html,body{height:auto;min-height:0}
+.slip{min-height:250mm;height:auto;padding:7mm 10mm;font-size:14px;border-width:2px;break-inside:avoid;page-break-inside:avoid}
+.slip h3{font-size:24px}
+.slip p{margin:4px 0}
+.subhead{font-size:13px;margin:2px 0 6px}
+.slip td,.slip th{font-size:14px;padding:4px 8px}
+.slip .mark{margin:2px 0}
+.slip .logos{margin:8px 0;justify-content:center}
+.slip .logos img{max-width:none;width:auto;height:85px}
+.slip figcaption{font-size:12px}
+.slip .sig{margin-top:auto;padding-top:8mm;margin-bottom:0}
+.wm span{font-size:72px}
+}
+/* S Square Labs logo: on every screen, and as a small corner mark on every printout */
+.brand{background:#fff;border-radius:8px;padding:5px 8px;margin:12px 0 8px;width:84px}
+.brand img{display:block;width:100%;height:auto}
+.login-logo{display:block;width:90px;height:auto;margin:0 auto -2px}
+.brand-print{display:none}
+@page{size:A4;margin:8mm}
+@media print{
+.brand{display:none}
+.brand-print{display:block;position:fixed;right:0;bottom:0;height:12mm;width:auto;opacity:.5;z-index:-1;pointer-events:none}
+table,tr:hover td{background:transparent}
+}

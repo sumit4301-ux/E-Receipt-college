@@ -1,16 +1,10 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{% block title %}Dashboard{% endblock %} | Receipts</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<!-- PWA Manifest & Service Worker Setup -->
-<link rel="manifest" href="/manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker registered successfully:', reg.scope))
-        .catch(err => console.log('Service Worker registration failed:', err));
-    });
-  }
-</script>
+<!-- PWA Manifest and Icons -->
+<link rel="manifest" href="{{ url_for('manifest') }}">
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
+<meta name="theme-color" content="#1b4d3e">
 </head><body>
 {% if session.uid %}
 <aside class="side"><h1>{{ college.get('name') or 'GIST, Rayagada' }}</h1><p>Digital Receipt Management</p>
@@ -24,11 +18,24 @@
 {% if has('admin') %}<a href="{{ url_for('college_page') }}">College details</a>{% endif %}
 {% if has() %}<a href="{{ url_for('master') }}">Master data</a>{% endif %}
 <a href="{{ url_for('account') }}">My account</a>
-</nav><div class="who">{{ session.user }} ({{ 'ultra admin' if session.role == 'superadmin' else session.role }})<a href="{{ url_for('logout') }}">Log out</a></div></aside>
+</nav><div class="brand"><img src="{{ url_for('static', filename='brand.png') }}" alt="S Square Labs"></div><div class="who">{{ session.user }} ({{ 'ultra admin' if session.role == 'superadmin' else session.role }})<a href="{{ url_for('logout') }}">Log out</a></div></aside>
 {% endif %}
 <main>
 {% block ph %}{% if session.uid %}<div class="printhead"><strong>{{ college.get('name') or 'GIST, Rayagada' }}</strong><br>{{ college.get('address','') }} {{ college.get('phone','') }}{% if college.get('email') %}<br>{{ college.get('email') }}{% endif %}</div>
 <div class="noprint" style="text-align:right"><button class="btn alt" onclick="window.print()">Print this page</button></div>{% endif %}{% endblock %}
 {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
 {% block body %}{% endblock %}
-</main><script type="module" src="{{ url_for('static', filename='app.js') }}"></script></body></html>
+</main><img class="brand-print" src="{{ url_for('static', filename='brand.png') }}" alt="S Square Labs"><script src="{{ url_for('static', filename='app.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='app.js') }}"></script>
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+        .catch(err => console.log('Service Worker registration failed:', err));
+    });
+  }
+</script>
+</body></html>
