@@ -128,7 +128,9 @@ def service_worker():
 
 @app.route('/')
 def index():
-    return "E-Receipt App is running!"
+    if 'uid' in session:
+        return render_template('dashboard.html')  # Or return redirect(url_for('dashboard'))
+    return render_template('login.html')
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
